@@ -52,12 +52,12 @@ if( Meteor.isServer ) {
     }
   });
 
-  //api.addRoute('removeperson/:id', {authRequired: false}, {
-  //  get: function() {
-  //    Meteor.users.remove(this.urlsParams.id);
-  //    var user = Accounts.findUserByUsername(this.urlParams.id);
-  //    RocketChat.deleteUser(user._id);
-  //    return true;
-  //  }
+  api.addRoute('removeperson/:id', {authRequired: false}, {
+    get: function() {
+      Meteor.users.remove(this.urlParams.id);
+      var user = Accounts.findUserByUsername(this.urlParams.id);
+      RocketChat.deleteUser(user._id);
+      return true;
+    }
   });
 }

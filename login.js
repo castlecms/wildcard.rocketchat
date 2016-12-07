@@ -7,11 +7,10 @@ FlowRouter.route('/plone/:cookie/:username/:email', {
                 email: FlowRouter.getParam('email')
             }
         };
-
+        
         Accounts.callLoginMethod({
             methodArguments: [options],
             userCallback: function(err, res) {
-                console.log('here');
                 FlowRouter.go('/');
             }
         });

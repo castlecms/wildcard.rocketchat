@@ -72,7 +72,10 @@ if( Meteor.isServer ) {
         var res = RocketChat.models.Subscriptions.createWithRoomAndUser(rooms[item], user);
       }
 
-      return id;
+      return {
+        userId: id,
+        type: 'plone'
+      };
     }else{
         var future = new Future();
 
