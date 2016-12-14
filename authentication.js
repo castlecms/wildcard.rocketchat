@@ -57,20 +57,16 @@ if( Meteor.isServer ) {
       return undefined;
     }
 
-
-    if( Accounts.findUserByUsername(loginRequest.user.id) === undefined ) {
+    var account = Accounts.findUserByUsername(loginRequest.user.id);
+    if( account === undefined ) {
       var id = Accounts.createUser({
         email: loginRequest.user.email,
         password: Random.id(),
         username: loginRequest.user.id
       });
 
-      var rooms = RocketChat.models.Rooms.findByType('c').fetch();
-      var user = RocketChat.models.Users.findOneById(id);
-
-      for( var item in rooms ) {
-        var res = RocketChat.models.Subscriptions.createWithRoomAndUser(rooms[item], user);
-      }
+      //var rooms = RocketChat.models.Rooms.findByType('c').fetch();
+      //var user = RocketChat.models.Users.findOneById(id);
 
       return {
         userId: id,

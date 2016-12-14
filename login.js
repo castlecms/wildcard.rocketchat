@@ -8,6 +8,7 @@ FlowRouter.route('/plone/:cookie/:username/:email', {
             }
         };
         
+
         Accounts.callLoginMethod({
             methodArguments: [options],
             userCallback: function(err, res) {
