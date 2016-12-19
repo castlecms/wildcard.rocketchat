@@ -1,13 +1,14 @@
-if( Meteor.isServer ) {
+if( Meteor.isServer ) { 
+
 
   Meteor.startup(function () {
     Future = Npm.require('fibers/future');
+    cache = new ApiCache('rest', 60);
 
     Meteor.methods({
-      'plone.login': function(cookie) {
-        
+      'plone.login': function(cookie, id) {
+
           var future = new Future();
-      
       
           var ploneAuthEnabled = RocketChat.settings.get('Allow Plone authentication');
 
@@ -21,20 +22,37 @@ if( Meteor.isServer ) {
               plonesite += '/';
           }
 
+          var url = plonesite + '@@verify-cookie?cookie=' + cookie + '&user=' + id;
+          var cacheId = cache.get(url);
+
+          if( cacheId ) {
+            return {
+              type: 'plone',
+              userId: cacheId 
+            };
+          }
+
           HTTP.call(
             'POST',
-            plonesite + '@@verify-cookie?cookie=' + cookie,
+            url,
             function(Accounts, error, res) {
               if( res === null ) {
                 future.return();
               }else{
                 var contents = JSON.parse(res.content);
+ 
+                if( contents.status === "failure" ) {
+                    console.log(contents);
+                    future.return(false);
+                }
+
                 var id = Accounts.findUserByUsername(contents.user);
 
                 if( id === undefined ) {
                   future.return();
                 }else{
                   id = id._id;
+                  cache.set(url, id);
                   future['return'](
                     {
                       type: 'plone',
@@ -75,7 +93,7 @@ if( Meteor.isServer ) {
     }else{
         var future = new Future();
 
-        Meteor.call('plone.login', loginRequest.cookie, function(err, res) {
+        Meteor.call('plone.login', loginRequest.cookie, account.username, function(err, res) {
             future.return(res);
         }.bind(future));
 
