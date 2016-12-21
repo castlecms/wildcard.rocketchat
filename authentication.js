@@ -1,15 +1,15 @@
-if( Meteor.isServer ) { 
+if( Meteor.isServer ) {
 
 
   Meteor.startup(function () {
     Future = Npm.require('fibers/future');
-    cache = new ApiCache('rest', 60);
+    cache = new ApiCache('rest', 600);
 
     Meteor.methods({
       'plone.login': function(cookie, id) {
 
-          var future = new Future();
-      
+          var ploneFuture = new Future();
+
           var ploneAuthEnabled = RocketChat.settings.get('Allow Plone authentication');
 
           if( !ploneAuthEnabled ) {
@@ -17,18 +17,19 @@ if( Meteor.isServer ) {
           }
 
           var plonesite = RocketChat.settings.get('Plone authentication endpoint');
-          
+
           if( plonesite.lastIndexOf('/') !== plonesite.length - 1 ) {
               plonesite += '/';
           }
 
           var url = plonesite + '@@verify-cookie?cookie=' + cookie + '&user=' + id;
-          var cacheId = cache.get(url);
+          var cacheKey = plonesite + id;
+          var cacheId = cache.get(cacheKey);
 
           if( cacheId ) {
             return {
               type: 'plone',
-              userId: cacheId 
+              userId: cacheId
             };
           }
 
@@ -37,23 +38,22 @@ if( Meteor.isServer ) {
             url,
             function(Accounts, error, res) {
               if( res === null ) {
-                future.return();
+                ploneFuture.return();
               }else{
                 var contents = JSON.parse(res.content);
- 
+
                 if( contents.status === "failure" ) {
-                    console.log(contents);
-                    future.return(false);
+                    ploneFuture.return(false);
                 }
 
                 var id = Accounts.findUserByUsername(contents.user);
 
                 if( id === undefined ) {
-                  future.return();
+                  ploneFuture.return();
                 }else{
                   id = id._id;
-                  cache.set(url, id);
-                  future['return'](
+                  cache.set(cacheKey, id);
+                  ploneFuture.return(
                     {
                       type: 'plone',
                       userId: id
@@ -61,10 +61,10 @@ if( Meteor.isServer ) {
                   );
                 }
               }
-            }.bind(future, Accounts)
+            }.bind(ploneFuture, Accounts)
           );
 
-          return future.wait();
+          return ploneFuture.wait();
       }
     });
   });
@@ -75,12 +75,12 @@ if( Meteor.isServer ) {
       return undefined;
     }
 
-    var account = Accounts.findUserByUsername(loginRequest.user.id);
+    var account = Accounts.findUserByUsername(loginRequest.user.name);
     if( account === undefined ) {
       var id = Accounts.createUser({
         email: loginRequest.user.email,
         password: Random.id(),
-        username: loginRequest.user.id
+        username: loginRequest.user.name
       });
 
       //var rooms = RocketChat.models.Rooms.findByType('c').fetch();

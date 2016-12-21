@@ -17,8 +17,8 @@ Package.onUse(function(api) {
   api.use('kadira:flow-router');
   api.use('rocketchat:lib');
   api.use('miktam:server-cache');
-  api.addFiles('authentication.js');
   api.addFiles('endpoints.js');
+  api.addFiles('authentication.js');
   api.addFiles('settings.js');
   api.addFiles('login.js');
 
