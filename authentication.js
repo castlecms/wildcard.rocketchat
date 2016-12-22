@@ -6,7 +6,7 @@ if( Meteor.isServer ) {
     cache = new ApiCache('rest', 600);
 
     Meteor.methods({
-      'plone.login': function(cookie, id) {
+      'plone.login': function(token, id) {
 
           var ploneFuture = new Future();
 
@@ -22,7 +22,7 @@ if( Meteor.isServer ) {
               plonesite += '/';
           }
 
-          var url = plonesite + '@@verify-cookie?cookie=' + cookie + '&user=' + id;
+          var url = plonesite + '@@verify-token?token=' + token + '&user=' + id;
           var cacheKey = plonesite + id;
           var cacheId = cache.get(cacheKey);
 
@@ -71,7 +71,7 @@ if( Meteor.isServer ) {
 
   Accounts.registerLoginHandler("plone", function(loginRequest) {
 
-    if( loginRequest.cookie === undefined ) {
+    if( loginRequest.token === undefined ) {
       return undefined;
     }
 
@@ -93,7 +93,7 @@ if( Meteor.isServer ) {
     }else{
         var future = new Future();
 
-        Meteor.call('plone.login', loginRequest.cookie, account.username, function(err, res) {
+        Meteor.call('plone.login', loginRequest.token, account.username, function(err, res) {
             future.return(res);
         }.bind(future));
 

@@ -20,7 +20,7 @@ if( Meteor.isServer ) {
         var user = this.bodyParams.user.name;
 
         //Since there's no connection open to a client, we can't actually properly "log in"
-        Meteor.call('plone.login', this.bodyParams.cookie, this.bodyParams.user.name, function(err, res) {
+        Meteor.call('plone.login', this.bodyParams.token, this.bodyParams.user.name, function(err, res) {
           if( err ) {
             messageFuture.return(false);
           }else if( res.userId ){

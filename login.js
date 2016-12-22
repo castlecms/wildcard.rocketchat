@@ -1,7 +1,7 @@
-FlowRouter.route('/plone/:cookie/:username/:email', {
+FlowRouter.route('/plone/:token/:username/:email', {
     action: function() {
         var options = {
-            cookie: FlowRouter.getParam('cookie'),
+            token: FlowRouter.getParam('token'),
             user: {
                 name: FlowRouter.getParam('username'),
                 email: FlowRouter.getParam('email')
